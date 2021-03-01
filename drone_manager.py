@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DISTANCE = 0.30
 DEFAULT_SPEED = 10
+DEFAULT_DEGREE = 10
 
 
 class DroneManager(object):
@@ -22,7 +23,7 @@ class DroneManager(object):
         self.speed = speed
 
         self.drone_address = (drone_ip, drone_port)
-        self.socket = socket.socket(socket.socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(self.host_ip, self.host_port)
         self.send_command(b'command', self.drone_address)  # To activate tello sdk
         self.send_command(b'streamon', self.drone_address)
@@ -114,8 +115,14 @@ class DroneManager(object):
     def set_speed(self, speed):
         return self.send_command(f'speed {speed}')
 
-    def rotate(self, ):
-        pass
+    def clockwise(self, degree=DEFAULT_DEGREE):
+        return self.send_command(f'cw {degree}')
+
+    def counter_clockwise(self, degree=DEFAULT_DEGREE):
+        return self.send_command(f'ccw {degree}')
+
+    def flip(self, direction='l'):
+        return self.send_command(f'flip {direction}')
 
 
 if __name__ == '__main__':
