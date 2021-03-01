@@ -7,13 +7,20 @@ import time
 logging.basicConfig(level=logging.INFO, steam=sys.stdout)
 logger = logging.getLogger(__name__)
 
+DEFAULT_DISTANCE = 0.30
+DEFAULT_SPEED = 10
+
 
 class DroneManager(object):
-    def __init__(self, host_ip='192.168.1.70', host_port=8889, drone_ip='192.168.10.1', drone_port=8889):
+    def __init__(self, host_ip='192.168.1.70', host_port=8889, drone_ip='192.168.10.1', drone_port=8889,
+                 is_imperial=False, speed=10):
         self.host_ip = host_ip
         self.host_port = host_port
         self.drone_ip = drone_ip
         self.drone_port = drone_port
+        self.is_imperial = is_imperial
+        self.speed = speed
+
         self.drone_address = (drone_ip, drone_port)
         self.socket = socket.socket(socket.socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(self.host_ip, self.host_port)
@@ -25,6 +32,8 @@ class DroneManager(object):
 
         self._response_thread = threading.Thread(target=self.receive_response, args=(self.stop_event,))
         self._response_thread.start()
+
+        self.set_speed(self.speed)
 
     def receive_response(self, stop_event):
         while not stop_event.is_set():
@@ -38,7 +47,7 @@ class DroneManager(object):
     def __dell__(self, ):
         self.stop()
 
-    def stop(self, retry):
+    def stop(self, retry=0):
         self.stop_event.set()
 
         while self._response_thread.isAlive():
@@ -67,7 +76,7 @@ class DroneManager(object):
             response = self.response.decode('utf-8')
 
         self.response = None
-        
+
         return response
 
     def takeoff(self, ):
@@ -75,6 +84,38 @@ class DroneManager(object):
 
     def land(self, ):
         self.send_command('land')
+
+    def move(self, direction, distance):
+        distance = float(distance)
+        if self.is_imperial:
+            distance = int(round(distance * 30.481))
+        else:
+            distance = int(round(distance * 100))
+        return self.send_command(f'{direction}{distance}')
+
+    def up(self, distance=DEFAULT_DISTANCE):
+        return self.move('up', distance)
+
+    def down(self, distance=DEFAULT_DISTANCE):
+        return self.move('down', distance)
+
+    def right(self, distance=DEFAULT_DISTANCE):
+        return self.move('right', distance)
+
+    def left(self, distance=DEFAULT_DISTANCE):
+        return self.move('left', distance)
+
+    def forward(self, distance=DEFAULT_DISTANCE):
+        return self.move('forward', distance)
+
+    def back(self, distance=DEFAULT_DISTANCE):
+        return self.move('back', distance)
+
+    def set_speed(self, speed):
+        return self.send_command(f'speed {speed}')
+
+    def rotate(self, ):
+        pass
 
 
 if __name__ == '__main__':
