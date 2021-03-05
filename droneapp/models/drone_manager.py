@@ -1,10 +1,8 @@
 import logging
 import socket
-import sys
 import threading
 import time
 
-logging.basicConfig(level=logging.INFO, steam=sys.stdout)
 logger = logging.getLogger(__name__)
 
 DEFAULT_DISTANCE = 0.30
@@ -123,10 +121,3 @@ class DroneManager(object):
 
     def flip(self, direction='l'):
         return self.send_command(f'flip {direction}')
-
-
-if __name__ == '__main__':
-    drone_manager = DroneManager()
-    drone_manager.takeoff()
-    time.sleep(20)
-    drone_manager.land()
