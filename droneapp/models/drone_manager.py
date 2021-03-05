@@ -128,7 +128,5 @@ class DroneManager(object):
 if __name__ == '__main__':
     drone_manager = DroneManager()
     drone_manager.takeoff()
-
     time.sleep(20)
-
     drone_manager.land()
